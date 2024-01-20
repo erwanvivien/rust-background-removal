@@ -1,6 +1,6 @@
-use ort::{Environment, ExecutionProvider, GraphOptimizationLevel, SessionBuilder};
+use ort::{Environment, ExecutionProvider, GraphOptimizationLevel, OrtError, SessionBuilder};
 
-pub(crate) fn onnx_session(onnx_model_file: &str) -> Result<ort::Session, anyhow::Error> {
+pub(crate) fn onnx_session() -> Result<ort::InMemorySession<'static>, OrtError> {
     let environment = Environment::default().into_arc();
     let session = SessionBuilder::new(&environment)?
         .with_optimization_level(GraphOptimizationLevel::Level1)? // Configure model optimization level
@@ -11,6 +11,6 @@ pub(crate) fn onnx_session(onnx_model_file: &str) -> Result<ort::Session, anyhow
             ExecutionProvider::CoreML(Default::default()),
             ExecutionProvider::CPU(Default::default()),
         ])?
-        .with_model_from_file(onnx_model_file)?;
+        .with_model_from_memory(include_bytes!("../models/medium.onnx"))?;
     Ok(session)
 }
